@@ -5,6 +5,9 @@ using Online.Store.SaaS.Domain.Models.Domains;
 
 namespace Online.Store.SaaS.Domain.Controllers
 {
+
+    [ApiController]
+    [Route("[controller]")]
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
@@ -16,13 +19,26 @@ namespace Online.Store.SaaS.Domain.Controllers
             _productRepository = productRepository;
         }
         [HttpGet(Name = "GetProducts")]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            var products = _productRepository.Select().Result;
+            var products = new List<GetProductDto>();
+            foreach (var item in _productRepository.Select().Result)
+            {
+                var product = new GetProductDto()
+                {
+                    Id = item.Id,
+                    Title = item.Title,
+                    UnitPrice = item.UnitPrice,
+                    Description = item.Description,
+
+                };
+                products.Add(product);
+            }
+
             return new JsonResult(products);
         }
         [HttpPost(Name = "PostProduct")]
-        public IActionResult Post(InsertProductDto insertProductDto)
+        public async Task<IActionResult> Post(InsertProductDto insertProductDto)
         {
             if (insertProductDto != null)
             {
@@ -31,15 +47,15 @@ namespace Online.Store.SaaS.Domain.Controllers
 
                     Title = insertProductDto.Title,
                     Description = insertProductDto.Description,
-                    UnitPrice = insertProductDto.UnitPrice,
+                    UnitPrice = insertProductDto.UnitPrice
                 };
-                _productRepository.InsertAsync(product);
+                await _productRepository.InsertAsync(product);
             }
 
             return Ok();
         }
         [HttpPut(Name = "PutProduct")]
-        public IActionResult Put(UpdateProductDto updateProductDto)
+        public async Task<IActionResult> Put(UpdateProductDto updateProductDto)
         {
             if (updateProductDto != null)
             {
@@ -50,17 +66,17 @@ namespace Online.Store.SaaS.Domain.Controllers
                     Description = updateProductDto.Description,
                     UnitPrice = updateProductDto.UnitPrice,
                 };
-                _productRepository.UpdateAsync(product);
+               await _productRepository.UpdateAsync(product);
             }
 
             return Ok();
         }
         [HttpDelete(Name = "DeleteProduct")]
-        public IActionResult Delete(DeleteProductDto deleteProductDto)
+        public async Task<IActionResult> Delete(DeleteProductDto deleteProductDto)
         {
             if (deleteProductDto != null)
             {
-                _productRepository.DeleteAsync(deleteProductDto.Id);
+                await _productRepository.DeleteAsync(deleteProductDto.Id);
             }
 
             return Ok();

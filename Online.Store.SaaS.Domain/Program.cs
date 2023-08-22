@@ -5,6 +5,18 @@ using Online.Store.SaaS.Domain.Models.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+    builder =>
+    {
+        builder.AllowAnyOrigin()
+                     .AllowAnyMethod()
+                     .AllowAnyHeader();
+        //.AllowCredentials();
+    });
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();

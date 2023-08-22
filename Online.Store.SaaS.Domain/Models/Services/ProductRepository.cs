@@ -29,44 +29,122 @@ namespace Online.Store.SaaS.Domain.Models.Services
 
                     throw;
                 }
+                finally
+                {
+                    _dbContext?.Dispose();
+                }
 
             }
         }
-
         public async Task UpdateAsync(Product product)
         {
-            _dbContext.Product.Attach(product);
-            _dbContext.Entry(product).State = EntityState.Modified;
-            await SaveChanges();
+            using (_dbContext)
+            {
+                try
+                {
+                    _dbContext.Product.Attach(product);
+                    _dbContext.Entry(product).State = EntityState.Modified;
+                    await SaveChanges();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+                finally
+                {
+                    _dbContext?.Dispose();
+                }
+
+            }
+
         }
 
         public async Task DeleteAsync(int id)
         {
-            var entityToDelete = _dbContext.Product.Find(id);
-            _dbContext.Remove(entityToDelete);
-            await SaveChanges();
+            try
+            {
+                var entityToDelete = _dbContext.Product.Find(id);
+                _dbContext.Remove(entityToDelete);
+                await SaveChanges();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+                _dbContext?.Dispose();
+            }
+
         }
 
         public virtual async Task DeleteAsync(Product product)
         {
-            if (_dbContext.Entry(product).State == EntityState.Detached)
+            try
             {
-                _dbContext.Product.Attach(product);
+                if (_dbContext.Entry(product).State == EntityState.Detached)
+                {
+                    _dbContext.Product.Attach(product);
+                }
+                _dbContext.Remove(product);
+                await SaveChanges();
             }
-            _dbContext.Remove(product);
-            await SaveChanges();
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+                _dbContext?.Dispose();
+            }
+
         }
 
         public async Task<List<Product>> Select()
         {
-            var q = _dbContext.Product.ToListAsync();
-            return await q;
+            //var q = _storeDbContext.Product.AsNoTracking().ToListAsync();
+            using (_dbContext)
+            {
+                try
+                {
+                    var q = await _dbContext.Product.ToListAsync();
+                    return q;
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+                finally
+                {
+                    _dbContext?.Dispose();
+                }
+
+            }
+
+
         }
 
         public async Task<Product> FindByIdAsync(int id)
         {
-            var q = _dbContext.Product.FindAsync(id);
-            return await q;
+            try
+            {
+                var q = await _dbContext.Product.FindAsync(id);
+                return q;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+                _dbContext?.Dispose();
+            }
+
         }
 
         public async Task SaveChanges()

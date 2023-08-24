@@ -21,10 +21,11 @@ namespace Online.Store.SaaS.Domain.Controllers
         [HttpGet(Name = "GetProducts")]
         public async Task<IActionResult> Get()
         {
-            var products = new List<GetProductDto>();
-            foreach (var item in _productRepository.Select().Result)
+            var getProductDtos = new List<GetProductDto>();
+            var products = await _productRepository.Select();
+            foreach (var item in products)
             {
-                var product = new GetProductDto()
+                var getProductDto = new GetProductDto()
                 {
                     Id = item.Id,
                     Title = item.Title,
@@ -32,7 +33,7 @@ namespace Online.Store.SaaS.Domain.Controllers
                     Description = item.Description,
 
                 };
-                products.Add(product);
+                getProductDtos.Add(getProductDto);
             }
 
             return new JsonResult(products);
